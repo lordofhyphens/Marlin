@@ -86,6 +86,7 @@ matrix_3x3 plan_bed_level_matrix = {
 
 // The current position of the tool in absolute steps
 long position[NUM_AXIS];   //rescaled from extern when axis_steps_per_unit are changed by gcode
+long target[NUM_AXIS]; 
 static float previous_speed[NUM_AXIS]; // Speed of previous path line segment
 static float previous_nominal_speed; // Nominal speed of previous path line segment
 
@@ -394,6 +395,7 @@ void plan_init() {
   block_buffer_head = 0;
   block_buffer_tail = 0;
   memset(position, 0, sizeof(position)); // clear position
+  memset(target, 0, sizeof(target)); // clear target
   previous_speed[0] = 0.0;
   previous_speed[1] = 0.0;
   previous_speed[2] = 0.0;
@@ -553,7 +555,6 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
   // The target position of the tool in absolute steps
   // Calculate target position in absolute steps
   //this should be done after the wait, because otherwise a M92 code within the gcode disrupts this calculation somehow
-  long target[4];
   target[X_AXIS] = lround(x*axis_steps_per_unit[X_AXIS]);
   target[Y_AXIS] = lround(y*axis_steps_per_unit[Y_AXIS]);
   target[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]);     
@@ -1058,11 +1059,20 @@ void plan_set_position(float x, float y, float z, const float &e)
 void plan_set_position(const float &x, const float &y, const float &z, const float &e)
 {
 #endif // ENABLE_AUTO_BED_LEVELING
-
-  position[X_AXIS] = lround(x*axis_steps_per_unit[X_AXIS]);
-  position[Y_AXIS] = lround(y*axis_steps_per_unit[Y_AXIS]);
-  position[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]);     
-  position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]);  
+  /* 
+  * Correct for small moves.
+  * If a previous move is smaller then dropsegments the move is dropped.
+  * The dropped move should be correced.
+  */
+  long x_diff = position[X_AXIS] - target[X_AXIS];
+  long y_diff = position[Y_AXIS] - target[Y_AXIS];
+  long z_diff = position[Z_AXIS] - target[Z_AXIS];
+  long e_diff = position[E_AXIS] - target[E_AXIS];
+  
+  position[X_AXIS] = lround(x*axis_steps_per_unit[X_AXIS]) + x_diff;
+  position[Y_AXIS] = lround(y*axis_steps_per_unit[Y_AXIS]) + y_diff;
+  position[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]) + z_diff;     
+  position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]) + e_diff;  
   st_set_position(position[X_AXIS], position[Y_AXIS], position[Z_AXIS], position[E_AXIS]);
   previous_nominal_speed = 0.0; // Resets planner junction speeds. Assumes start from rest.
   previous_speed[0] = 0.0;
