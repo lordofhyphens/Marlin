@@ -619,13 +619,23 @@
     #define Z2_DIR_PIN         34
     #define Z2_ENABLE_PIN      30
 
-    #define E0_STEP_PIN        26
-    #define E0_DIR_PIN         28
-    #define E0_ENABLE_PIN      24
+    #ifdef SWAP_E0E1
+      #define E1_STEP_PIN        26
+      #define E1_DIR_PIN         28
+      #define E1_ENABLE_PIN      24
 
-    #define E1_STEP_PIN        36
-    #define E1_DIR_PIN         34
-    #define E1_ENABLE_PIN      30
+      #define E0_STEP_PIN        36
+      #define E0_DIR_PIN         34
+      #define E0_ENABLE_PIN      30
+    #else
+      #define E0_STEP_PIN        26
+      #define E0_DIR_PIN         28
+      #define E0_ENABLE_PIN      24
+
+      #define E1_STEP_PIN        36
+      #define E1_DIR_PIN         34
+      #define E1_ENABLE_PIN      30
+    #endif
 
 #if MB(RAMPS_13_EEB)  //FMM added for Filament Extruder
 #ifdef FILAMENT_SENSOR
