@@ -17,9 +17,9 @@
 
 #define LARGE_FLASH true
 
-#define X_STEP_PIN         54
-#define X_DIR_PIN          55
-#define X_ENABLE_PIN       38
+#define X_STEP_PIN         36//54
+#define X_DIR_PIN          34//55
+#define X_ENABLE_PIN       30//38
 #define X_MIN_PIN           3
 #define X_MAX_PIN           2
 
